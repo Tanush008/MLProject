@@ -32,13 +32,13 @@ class DataTransformation:
                                "test_preparation_course",]
             num_pipeline = Pipeline(
                 steps=[
-                    ("imputer", SimpleImputer(startegy="median")),
+                    ("imputer", SimpleImputer(strategy="median")),
                     ("scaler", StandardScaler())
                 ]
             )
             cat_pipeline = Pipeline(
                 steps=[
-                    ("imputer", SimpleImputer(startegy="most Frequent"))
+                    ("imputer", SimpleImputer(strategy="most_frequent")),
                     ("one_hot_encode", OneHotEncoder()),
                     ("scaler", StandardScaler(with_mean=False))
                 ]
@@ -106,6 +106,6 @@ class DataTransformation:
                 test_df,
                 self.data_trans_config.preprocess_obj_file_path
             )
-            
+
         except Exception as e:
             raise CustomException(e, sys)
