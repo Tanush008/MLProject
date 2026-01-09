@@ -1,4 +1,3 @@
-
 name: workflow
 
 on:
@@ -6,7 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'README.md'
+      - "README.md"
 
 permissions:
   id-token: write
@@ -62,8 +61,7 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          
-          
+
   Continuous-Deployment:
     needs: build-and-push-ecr-image
     runs-on: self-hosted
@@ -81,25 +79,26 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
       - name: Verify ECR images
         run: |
           aws ecr list-images \
-          --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} \
-          --region ${{ secrets.AWS_REGION }}
+            --repository-name ${{ secrets.ECR_REPOSITORY_NAME }} \
+            --region ${{ secrets.AWS_REGION }}
 
-      - name: Pull latest images
+      - name: Pull latest image
         run: |
-         docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
-     
-           docker ps -q --filter "name=studentper" | grep -q . && docker stop studentper && docker rm -fv studentper
+          docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+
+      - name: Stop old container (if exists)
+        run: |
+          docker rm -f studentper || true
 
       - name: Run Docker container
         run: |
-         docker rm -f studentper || true
           docker run -d -p 8080:8080 --ipc="host" \
           --name studentper \
-            -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+          -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
           -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
           -e AWS_REGION=${{ secrets.AWS_REGION }} \
           ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
-
