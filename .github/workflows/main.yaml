@@ -83,10 +83,10 @@ jobs:
           docker pull \
           ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ github.sha }}
 
-      - name: Stop old container
-        run: |
-          docker rm -f studentper || true
-
-      - name: Run new container
-        run: |
-          docker run -d -p 8080:8080 --ipc=host --name=studentper --restart unless-stopped -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} -e AWS_REGION=${{ secrets.AWS_REGION }} ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ github.sha }}
+        - name: Run container
+          run: |
+            docker run -d -p 8080:8080 --ipc=host --name studentper --restart unless-stopped \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              -e AWS_REGION=${{ secrets.AWS_REGION }} \
+              604429647249.dkr.ecr.us-east-1.amazonaws.com/studentper:c0e4e533352e25a0fa0b190e27f90cd5b143abff
