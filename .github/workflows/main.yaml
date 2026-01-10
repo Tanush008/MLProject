@@ -5,16 +5,16 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'README.md'
+      - "README.md"
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-# =========================
-# 1️⃣ CONTINUOUS INTEGRATION
-# =========================
+  # =========================
+  # 1️⃣ CONTINUOUS INTEGRATION
+  # =========================
   integration:
     name: Continuous Integration
     runs-on: ubuntu-latest
@@ -27,9 +27,9 @@ jobs:
       - name: Run unit tests
         run: echo "Running unit tests"
 
-# =========================
-# 2️⃣ BUILD & PUSH TO ECR
-# =========================
+  # =========================
+  # 2️⃣ BUILD & PUSH TO ECR
+  # =========================
   build-and-push-ecr-image:
     name: Build & Push Image
     needs: integration
@@ -58,9 +58,9 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-# =========================
-# 3️⃣ CONTINUOUS DEPLOYMENT
-# =========================
+  # =========================
+  # 3️⃣ CONTINUOUS DEPLOYMENT
+  # =========================
   continuous-deployment:
     name: Deploy to EC2
     needs: build-and-push-ecr-image
@@ -89,12 +89,4 @@ jobs:
 
       - name: Run new container
         run: |
-          docker run -d \
-            -p 8080:8080 \
-            --ipc=host \
-            --name studentper \
-            --restart unless-stopped \
-            -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            -e AWS_REGION=${{ secrets.AWS_REGION }} \
-            ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ github.sha }}
+          docker run -d -p 8080:8080 --ipc=host --name=studentper --restart unless-stopped -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} -e AWS_REGION=${{ secrets.AWS_REGION }} ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:${{ github.sha }}
